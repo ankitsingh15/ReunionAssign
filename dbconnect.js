@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-
+const MONGO_URL = process.env.MONGO_URL;
 module.exports = async () => {
-  const mongoUrl =
-    "mongodb+srv://root:root@cluster0.dr3cy41.mongodb.net/backendAssign?retryWrites=true&w=majority";
+  const mongoUrl = process.env.MONGO_URL;
 
   try {
     mongoose.connect(
