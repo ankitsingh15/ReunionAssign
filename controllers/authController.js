@@ -10,12 +10,11 @@ const loginController = async (req, res) => {
   try {
     const { email, password, username } = req.body;
     if (!email || !password || !username) {
-      //   return res.status(400).send("All fields are required");
       return res.send(error(400, "All fields are required"));
     }
 
     const userfromdb = await User.findOne({ email: email });
-    console.log("userfromdb", userfromdb);
+    // console.log("userfromdb", userfromdb);
     if (userfromdb) {
       const pass = userfromdb.password;
       const checkpass = await bcrypt.compare(password, pass);
@@ -37,7 +36,6 @@ const loginController = async (req, res) => {
 
     const accessToken = generateAccessToken({ _id: user._id });
 
-    // return res.json({ accessToken });
     return res.send(success(201, { accessToken }));
   } catch (e) {
     console.log(e);
@@ -45,7 +43,7 @@ const loginController = async (req, res) => {
   }
 };
 
-//Internal Functions for creating Token
+//Internal Function for creating Token
 const generateAccessToken = (data) => {
   const token = jwt.sign(data, process.env.ACCESS_TOKEN_PRIVATE_KEY, {
     expiresIn: "1d",
@@ -54,27 +52,14 @@ const generateAccessToken = (data) => {
   return token;
 };
 
-const logoutController = async (req, res) => {
-  try {
-    res.clearCookie("jwt", {
-      httpOnly: true,
-      secure: true,
-    });
-
-    return res.send({ message: "user Logged Out" });
-  } catch (e) {
-    res.send({ error: e.message });
-  }
-};
-
 const followuser = async (req, res) => {
   try {
     const userId = req._id;
     const userIdtoFollow = req.params.id;
-    // console.log("ids are", userId, userIdtoFollow);
+
     const curuser = await User.findById(userId);
     const userToFollow = await User.findById(userIdtoFollow);
-    console.log("user are", curuser, userToFollow);
+    // console.log("user are", curuser, userToFollow);
     if (curuser.followings.includes(userIdtoFollow)) {
       return res.send({ message: "You're already following the User" });
     } else {
@@ -146,7 +131,7 @@ const addPosts = async (req, res) => {
       description,
     });
     const userfromDb = await User.findById(userId);
-    console.log("Posts is ", post);
+    // console.log("Posts is ", post);
     userfromDb.posts.push(post._id);
     await userfromDb.save();
     return res.send({
@@ -197,7 +182,7 @@ const likePost = async (req, res) => {
     await post.save();
     return res.send(success(201, "Post Liked Successfully"));
   } catch (e) {
-    console.log(e.message);
+    // console.log(e.message);
     res.send({ error: e.message });
   }
 };
@@ -207,7 +192,7 @@ const unlikePost = async (req, res) => {
     const postId = req.params.id;
     const userId = req._id;
     const post = await Post.findById(postId);
-    console.log("ids are", userId, post.likes);
+    // console.log("ids are", userId, post.likes);
     if (post.likes.includes(userId)) {
       const index = post.likes.indexOf(userId);
       post.likes.splice(index, 1);
@@ -217,7 +202,7 @@ const unlikePost = async (req, res) => {
       return res.send(error(401, "You Don't like this Post"));
     }
   } catch (e) {
-    console.log(e.message);
+    // console.log(e.message);
     res.send({ error: e.message });
   }
 };
@@ -231,7 +216,7 @@ const addComment = async (req, res) => {
     if (!post) {
       return res.send(error(409, "Post not found"));
     }
-    console.log("post is", post);
+    // console.log("post is", post);
     if (!desc) {
       return res.send(error(409, "Desc is required"));
     }
@@ -244,7 +229,7 @@ const addComment = async (req, res) => {
     await post.save();
     return res.send({ id: dbacomment._id });
   } catch (e) {
-    console.log(e.message);
+    // console.log(e.message);
     res.send({ error: e.message });
   }
 };
@@ -252,7 +237,9 @@ const addComment = async (req, res) => {
 const getPostWithId = async (req, res) => {
   try {
     const postId = req.params.id;
+
     const post = await Post.findById(postId).populate("comment");
+    console.log("The posts are ", post, req.params.id);
     if (!post) {
       return res.send(error(407, "No Post Found!! "));
     }
@@ -263,7 +250,7 @@ const getPostWithId = async (req, res) => {
       comment: post.comment.length,
     });
   } catch (e) {
-    console.log(e.message);
+    // console.log(e.message);
     res.send({ error: e.message });
   }
 };
@@ -287,18 +274,18 @@ const getAllPosts = async (req, res) => {
       likes: post.likes.length,
     }));
 
-    console.log(mappedPosts);
+    // console.log(mappedPosts);
 
     res.send(success(200, mappedPosts));
   } catch (e) {
-    console.log(e.message);
+    // console.log(e.message);
     res.send({ error: e.message });
   }
 };
 
 module.exports = {
   loginController,
-  logoutController,
+
   followuser,
   Unfollowuser,
   addPosts,
